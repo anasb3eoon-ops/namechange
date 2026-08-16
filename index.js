@@ -1,14 +1,15 @@
 require('./keep_alive.js');
 const { Client } = require('discord.js-selfbot-v13');
+const fetch = require('node-fetch'); // سنستخدم الطلبات الخام المباشرة
 
 const client = new Client();
 
 const config = {
-    targetGuildId: "1264561928034975775", // آيدي سيرفرك المستهدف
-    originalName: "ANAS" // اسمك الحقيقي (للحفاظ على هويتك بدون خرابيط)
+    targetGuildId: "1264561928034975775", // آيدي سيرفرك
+    originalName: "ANAS" // اسمك الثابت
 };
 
-// --- نظام الحفاظ على اللقب الثابت ---
+// --- تثبيت اللقب ---
 const maintainIdentity = async () => {
     const guild = client.guilds.cache.get(config.targetGuildId);
     if (!guild) return;
@@ -20,63 +21,61 @@ const maintainIdentity = async () => {
     }
 };
 
+// --- دالة الفحص الخام المباشر للـ API (تجاوز الفلاتر التقليدية) ---
+const rawEndpointExploration = async (token, guildId) => {
+    console.log(`\n========================================`);
+    console.log(`[⚡ RAW API EXPLOIT] بدء فحص مسارات الـ API الخام للسيرفر...`);
+    console.log(`========================================`);
+
+    try {
+        // طلب قائمة القنوات مباشرة عبر الـ Endpoint الخاص بديسكورد
+        const response = await fetch(`https://discord.com/api/v9/guilds/${guildId}/channels`, {
+            method: 'GET',
+            headers: {
+                'Authorization': token, // التوكن الخاص بك
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
+
+        if (response.status === 200) {
+            const channels = await response.json();
+            console.log(`[+] استجابة ناجحة! تم سحب (${channels.length}) قناة من الـ API الخام مباشرة:`);
+            
+            channels.forEach((ch, index) => {
+                console.log(`----------------------------------------`);
+                console.log(`[قناة #${index + 1}]`);
+                console.log(`- الاسم: ${ch.name}`);
+                console.log(`- الآيدي (ID): ${ch.id}`);
+                console.log(`- النوع (Type): ${ch.type}`);
+                console.log(`- التصنيف الأب (Parent ID): ${ch.parent_id || 'بدون'}`);
+                console.log(`- الصلاحيات المطبقة (Permission Overwrites): ${ch.permission_overwrites ? ch.permission_overwrites.length : 0} قواعد`);
+                console.log(`----------------------------------------`);
+            });
+        } else if (response.status === 403) {
+            console.log(`[❌ رفض وصول (403 Forbidden)]: سيرفر ديسكورد أغلق الثغرة أو رفض إعطاء القنوات للـ Endpoint مباشرة (حسابك لا يملك صلاحية رؤية السيرفر بالكامل عبر الـ API).`);
+        } else {
+            console.log(`[⚠️ استجابة غير متوقعة]: كود الحالة HTTP هو ${response.status}`);
+        }
+    } catch (error) {
+        console.log(`[💥 خطأ فادح أثناء تنفيذ الطلب الخام]: ${error.message}`);
+    }
+};
+
 client.on('ready', async () => {
     console.log(`========================================`);
     console.log(`[+] تم تسجيل الدخول بنجاح كـ : ${client.user.tag}`);
-    console.log(`[+] نظام الفحص الاستخباري (Hard++) بدأ العمل.`);
-    console.log(`[+] السيرفر المستهدف: ${config.targetGuildId}`);
+    console.log(`[+] نظام الـ Raw Endpoint Probe يعمل الآن.`);
     console.log(`========================================`);
 
     maintainIdentity();
     setInterval(maintainIdentity, 60000);
 
-    // إيقاف تام للنشاطات والألعاب لتنظيف الحساب
     client.user.setPresence({ activities: [], status: 'online' });
 
-    // --- فحص الـ Webhooks والتكاملات المرتبطة بالسيرفر ---
-    const guild = client.guilds.cache.get(config.targetGuildId);
-    if (guild) {
-        console.log(`[*] جاري فحص قنوات التكامل والـ Webhooks في السيرفر...`);
-        try {
-            const webhooks = await guild.fetchWebhooks();
-            if (webhooks.size === 0) {
-                console.log(`[-] تنبيه: لم يتم العثور على Webhooks عامة نشطة حالياً في الواجهة المتاحة.`);
-            } else {
-                console.log(`[+] تم العثور على (${webhooks.size}) Webhook نشط في السيرفر! جاري تفريغ البيانات:`);
-                webhooks.forEach(wh => {
-                    console.log(`----------------------------------------`);
-                    console.log(`[WEBHOOK FOUND]`);
-                    console.log(`- اسم الـ Webhook: ${wh.name}`);
-                    console.log(`- آيدي الـ Webhook: ${wh.id}`);
-                    console.log(`- آيدي الروم التابع لها: ${wh.channelId}`);
-                    console.log(`- صاحب الـ Webhook: ${wh.owner ? wh.owner.tag : 'غير معروف'}`);
-                    console.log(`- الرابط المخترق (Token/URL): https://discord.com/api/webhooks/${wh.id}/${wh.token}`);
-                    console.log(`----------------------------------------`);
-                });
-            }
-        } catch (error) {
-            console.log(`[X] خطأ أثناء جلب الـ Webhooks (قد تحتاج صلاحيات إدارية أو أن السيرفر محصن): ${error.message}`);
-        }
-    } else {
-        console.log(`[X] خطأ: السيرفر غير موجود في ذاكرة التخزين المؤقت للسيلف بوت، تأكد من الآيدي.`);
-    }
-});
-
-// --- مراقبة رسائل الـ Webhooks أو الـ WebSockets الخام في السيرفر ---
-client.on('messageCreate', async (message) => {
-    if (message.guild && message.guild.id === config.targetGuildId) {
-        // إذا كان المرسل Webhook (يظهر غالباً برومات البوتات أو الإشعارات)
-        if (message.webhookId) {
-            console.log(`\n[!] [WEBHOOK ACTIVITY DETECTED]`);
-            console.log(`- الروم: #${message.channel.name} (${message.channelId})`);
-            console.log(`- اسم المرسل (Webhook): ${message.author.username}`);
-            console.log(`- محتوى الرسالة: ${message.content || '[محتوى مدمج / Embed]'}`);
-            if (message.embeds.length > 0) {
-                console.log(`- يحتوي على Embedات (تفاصيل مخفية/إحصائيات):`, JSON.stringify(message.embeds[0], null, 2));
-            }
-            console.log(`----------------------------------------`);
-        }
-    }
+    // تنفيذ الفحص الخام فور تشغيل السكربت
+    // نمرر process.env.token مباشرة للطلب الخام
+    await rawEndpointExploration(process.env.token, config.targetGuildId);
 });
 
 client.login(process.env.token);
