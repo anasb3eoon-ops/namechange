@@ -4,25 +4,24 @@ const { Client } = require('discord.js-selfbot-v13');
 const client = new Client();
 
 const config = {
-    targetGuildId: "1264561928034975775", // آيدي سيرفرك
-    // اختر الشكل الذي يعجبك لاسم ANAS بالخط الأسطوري:
-    epicName: "𝕬𝕹𝕬𝕾" // أو يمكنك جعله: 𝓐𝓝𝓐𝓢 أو 𝚫𝚴𝚫𝚺
+    targetGuildId: "1264561928034975775", // سيرفرك
+    originalName: "ANAS" // اسمك الطبيعي
 };
 
-// --- نظام فرض الهوية والخط الخارق (التعافي الذاتي الفوري) ---
-const updateMyIdentity = async () => {
+// --- إعادة الاسم الطبيعي وتثبيته ---
+const resetMyIdentity = async () => {
     const guild = client.guilds.cache.get(config.targetGuildId);
     if (!guild) return;
     
     const me = guild.members.cache.get(client.user.id);
     if (!me) return;
 
-    if (me.nickname !== config.epicName) {
+    if (me.nickname !== config.originalName) {
         try {
-            await me.setNickname(config.epicName);
-            console.log("⚡ تم فرض الخط الأسطوري بنجاح.");
+            await me.setNickname(config.originalName);
+            console.log("✅ تم إعادة الاسم الطبيعي بنجاح.");
         } catch (e) {
-            console.error("❌ تأكد من صلاحية تغيير اللقب (Change Nickname) في السيرفر.");
+            console.error("❌ تأكد من صلاحيات اللقب.");
         }
     }
 };
@@ -30,21 +29,16 @@ const updateMyIdentity = async () => {
 client.on('ready', async () => {
     console.log(`✅ تم تسجيل الدخول كـ : ${client.user.tag}`);
     
-    // تفعيل الخط فوراً ومراقبته كل 15 ثانية لمنع أي شخص من تغييره
-    updateMyIdentity();
-    setInterval(updateMyIdentity, 15000); 
+    // ضبط الاسم فوراً
+    resetMyIdentity();
 
-    // --- نظام التلاعب بالبروفايل (حالة الـ Streaming المرعبة واللون الأحمر) ---
+    // --- إيقاف جميع النشاطات والألعاب وحذفها تماماً ---
     client.user.setPresence({
-        activities: [{
-            name: '⚠️ SYSTEM OVERRIDE // 𝕬𝕹𝕬𝕾',
-            type: 'STREAMING', 
-            url: 'https://twitch.tv/discord'
-        }],
-        status: 'dnd' // حالة عدم الإزعاج (اللون الأحمر)
+        activities: [], // فارغة تماماً - لا نشاطات ولا ألعاب
+        status: 'online'
     });
 
-    console.log("🔥 تم تفعيل نظام الرعب والبروفايل المخترق بنجاح.");
+    console.log("🧹 تم تنظيف الحساب وإلغاء كافة النشاطات واللعب.");
 });
 
 client.login(process.env.token);
