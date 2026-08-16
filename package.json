@@ -1,0 +1,13 @@
+{
+  "name": "neon-identity-bot",
+  "version": "1.0.0",
+  "description": "Clean Selfbot for Identity & RPC",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js-selfbot-v13": "^3.5.1",
+    "express": "^4.18.2"
+  }
+}
