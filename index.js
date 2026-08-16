@@ -4,17 +4,12 @@ const { Client } = require('discord.js-selfbot-v13');
 const client = new Client();
 
 const config = {
-    // 1. آيدي السيرفر المستهدف (اللي بدك يظهر فيه التاج)
-    targetGuildId: "1264561928034975775", 
-    
-    // 2. اسمك الحقيقي
-    myDisplayName: "اANAS", 
-    
-    // 3. التاج الأسود/النيون
-    blackCrownTag: "👑"     
+    targetGuildId: "1264561928034975775", // آيدي سيرفرك
+    // اختر الشكل الذي يعجبك لاسم ANAS بالخط الأسطوري:
+    epicName: "𝕬𝕹𝕬𝕾" // أو يمكنك جعله: 𝓐𝓝𝓐𝓢 أو 𝚫𝚴𝚫𝚺
 };
 
-// --- نظام فرض الهوية والتاج (التعافي الذاتي) ---
+// --- نظام فرض الهوية والخط الخارق (التعافي الذاتي الفوري) ---
 const updateMyIdentity = async () => {
     const guild = client.guilds.cache.get(config.targetGuildId);
     if (!guild) return;
@@ -22,34 +17,34 @@ const updateMyIdentity = async () => {
     const me = guild.members.cache.get(client.user.id);
     if (!me) return;
 
-    const newNickname = `${config.blackCrownTag} ${config.myDisplayName}`;
-    
-    if (me.nickname !== newNickname) {
+    if (me.nickname !== config.epicName) {
         try {
-            await me.setNickname(newNickname);
-            console.log("👑 تم فرض التاج الأسود بنجاح عبر التعافي الذاتي.");
+            await me.setNickname(config.epicName);
+            console.log("⚡ تم فرض الخط الأسطوري بنجاح.");
         } catch (e) {
-            console.error("❌ خطأ: تأكد أن حسابك يملك صلاحية تغيير اللقب (Change Nickname) في السيرفر.");
+            console.error("❌ تأكد من صلاحية تغيير اللقب (Change Nickname) في السيرفر.");
         }
     }
 };
 
 client.on('ready', async () => {
-    console.log(`✅ تم تسجيل الدخول بنجاح كـ : ${client.user.tag}`);
+    console.log(`✅ تم تسجيل الدخول كـ : ${client.user.tag}`);
     
-    // تفعيل التاج فوراً وتكرار الفحص كل 30 ثانية
+    // تفعيل الخط فوراً ومراقبته كل 15 ثانية لمنع أي شخص من تغييره
     updateMyIdentity();
-    setInterval(updateMyIdentity, 30000); 
+    setInterval(updateMyIdentity, 15000); 
 
-    // تعيين الحالة الخارقة (Rich Presence)
+    // --- نظام التلاعب بالبروفايل (حالة الـ Streaming المرعبة واللون الأحمر) ---
     client.user.setPresence({
         activities: [{
-            name: 'Cyberpunk 2077',
-            type: 'PLAYING',
-            applicationId: "782291108640030730"
+            name: '⚠️ SYSTEM OVERRIDE // 𝕬𝕹𝕬𝕾',
+            type: 'STREAMING', 
+            url: 'https://twitch.tv/discord'
         }],
-        status: 'online'
+        status: 'dnd' // حالة عدم الإزعاج (اللون الأحمر)
     });
+
+    console.log("🔥 تم تفعيل نظام الرعب والبروفايل المخترق بنجاح.");
 });
 
 client.login(process.env.token);
